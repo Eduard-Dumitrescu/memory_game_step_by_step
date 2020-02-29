@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:memory_game_step_by_step/utils.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -22,10 +23,28 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget _appBar() {
     return AppBar(
       title: Text(widget.title),
+      centerTitle: true,
     );
   }
 
   Widget _mainBody() {
-    return Container();
+    return Board();
+  }
+}
+
+class Board extends StatefulWidget {
+  @override
+  _BoardState createState() => _BoardState();
+}
+
+class _BoardState extends State<Board> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      //set width and height so that rows and columns will behave
+      width: Utils.deviceWidth(context),
+      height: Utils.deviceHeightWithoutAppBar(context),
+      color: Colors.green,
+    );
   }
 }
