@@ -13,11 +13,19 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-        ),
+        appBar: _appBar(),
         body:
-            Container() // This trailing comma makes auto-formatting nicer for build methods.
+            _mainBody() // This trailing comma makes auto-formatting nicer for build methods.
         );
+  }
+
+  Widget _appBar() {
+    return AppBar(
+      title: Text(widget.title),
+    );
+  }
+
+  Widget _mainBody() {
+    return Container();
   }
 }
