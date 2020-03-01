@@ -7,6 +7,11 @@ import 'package:memory_game_step_by_step/card_model.dart';
 import 'package:memory_game_step_by_step/icon_assets.dart';
 import 'package:memory_game_step_by_step/utils.dart';
 
+enum PlayerMode {
+  SinglePlayer,
+  TwoPlayers,
+}
+
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
 
@@ -17,6 +22,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  PlayerMode _playerMode = PlayerMode.SinglePlayer;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,6 +37,30 @@ class _MyHomePageState extends State<MyHomePage> {
     return AppBar(
       title: Text(widget.title),
       centerTitle: true,
+      actions: <Widget>[
+        IconButton(
+          icon: Icon(
+            Icons.filter_1,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            setState(() {
+              _playerMode = PlayerMode.SinglePlayer;
+            });
+          },
+        ),
+        IconButton(
+          icon: Icon(
+            Icons.filter_2,
+            color: Colors.white,
+          ),
+          onPressed: () {
+            setState(() {
+              _playerMode = PlayerMode.TwoPlayers;
+            });
+          },
+        ),
+      ],
     );
   }
 
@@ -38,8 +69,37 @@ class _MyHomePageState extends State<MyHomePage> {
       //set width and height so that rows and columns will behave
       width: Utils.deviceWidth(context),
       height: Utils.deviceHeightWithoutAppBar(context),
-      child: Board(),
+      child: _content(),
     );
+  }
+
+  Widget _content() {
+    final Orientation orientation = MediaQuery.of(context).orientation;
+
+    switch (_playerMode) {
+      case PlayerMode.SinglePlayer:
+        return Board();
+      case PlayerMode.TwoPlayers:
+        return orientation == Orientation.portrait
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                      flex: 1,
+                      child: Transform.rotate(angle: pi, child: Board())),
+                  Expanded(flex: 1, child: Board()),
+                ],
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(flex: 1, child: Board()),
+                  Expanded(flex: 1, child: Board()),
+                ],
+              );
+    }
   }
 }
 
