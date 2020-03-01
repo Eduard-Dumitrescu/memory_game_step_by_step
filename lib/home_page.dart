@@ -65,9 +65,11 @@ class Board extends StatefulWidget {
 
 class _BoardState extends State<Board> {
   List<CardModel> _cards;
+  List<CardModel> _flippedCards;
 
   @override
   void initState() {
+    _flippedCards = List<CardModel>();
     final int rnd =
         Random().nextInt(IconAssets.assets.length - 1 - widget.numOfElements);
 
@@ -98,13 +100,12 @@ class _BoardState extends State<Board> {
 
       for (int j = 0; j < widget.numOfColumns; j++) {
         final int index = i * widget.numOfColumns + j;
-        final CardModel card = _cards[index];
 
         elements.add(Flexible(
           flex: 1,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: _card(card.imagePath, card.cardKey),
+            child: _card(_cards[index]),
           ),
         ));
       }
@@ -125,17 +126,21 @@ class _BoardState extends State<Board> {
     );
   }
 
-  Widget _card(
-    String imgPath,
-    GlobalKey<FlipCardState> cardKey,
-  ) {
+  Widget _card(CardModel card) {
     return FlipCard(
-      key: cardKey,
+      key: card.cardKey,
       flipOnTouch: false,
       direction: FlipDirection.HORIZONTAL,
       front: InkWell(
         onTap: () async {
-          cardKey.currentState.toggleCard();
+          if (_flippedCards.length != 2) {
+            card.cardKey.currentState.toggleCard();
+            _flippedCards.add(card);
+            if (_flippedCards.length == 2)
+              //delay so player can't click new card before animation finishes or something like that
+              Future.delayed(
+                  const Duration(milliseconds: 500), () async => _maybeReset());
+          }
         },
         child: Container(
           color: widget.frontCardColor,
@@ -143,8 +148,15 @@ class _BoardState extends State<Board> {
       ),
       back: Container(
         color: widget.backCardColor,
-        child: SvgPicture.asset(imgPath),
+        child: SvgPicture.asset(card.imagePath),
       ),
     );
+  }
+
+  _maybeReset() {
+    if (_flippedCards[0].id != _flippedCards[1].id) {
+      _flippedCards.forEach((card) => card.cardKey.currentState.toggleCard());
+    }
+    _flippedCards.clear();
   }
 }
