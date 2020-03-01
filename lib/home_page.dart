@@ -1,5 +1,7 @@
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:memory_game_step_by_step/icon_assets.dart';
 import 'package:memory_game_step_by_step/utils.dart';
 
 class MyHomePage extends StatefulWidget {
@@ -107,6 +109,7 @@ class _BoardState extends State<Board> {
       ),
       back: Container(
         color: widget.backCardColor,
+        child: SvgPicture.asset(IconAssets.icon019Kitty30),
       ),
     );
   }
