@@ -1,3 +1,4 @@
+import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
 import 'package:memory_game_step_by_step/utils.dart';
 
@@ -39,14 +40,16 @@ class _MyHomePageState extends State<MyHomePage> {
 
 class Board extends StatefulWidget {
   final Color mainColor;
-  final Color cardColor;
+  final Color frontCardColor;
+  final Color backCardColor;
   final double numOfElements;
   final double numOfColumns;
 
   const Board(
       {Key key,
       this.mainColor = Colors.green,
-      this.cardColor = Colors.redAccent,
+      this.frontCardColor = Colors.redAccent,
+      this.backCardColor = Colors.yellow,
       this.numOfElements = 16,
       this.numOfColumns = 4})
       : super(key: key);
@@ -75,9 +78,7 @@ class _BoardState extends State<Board> {
           flex: 1,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Container(
-              color: widget.cardColor,
-            ),
+            child: _card(),
           ),
         ));
       }
@@ -95,6 +96,18 @@ class _BoardState extends State<Board> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: rows,
+    );
+  }
+
+  Widget _card() {
+    return FlipCard(
+      direction: FlipDirection.HORIZONTAL,
+      front: Container(
+        color: widget.frontCardColor,
+      ),
+      back: Container(
+        color: widget.backCardColor,
+      ),
     );
   }
 }
