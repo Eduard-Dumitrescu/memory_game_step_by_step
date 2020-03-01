@@ -64,6 +64,9 @@ class Board extends StatefulWidget {
 }
 
 class _BoardState extends State<Board> {
+  final ValueNotifier<String> _message = ValueNotifier<String>("");
+  int _totalFlippedCards = 0;
+
   List<CardModel> _cards;
   List<CardModel> _flippedCards;
 
@@ -88,7 +91,41 @@ class _BoardState extends State<Board> {
   Widget build(BuildContext context) {
     return Container(
       color: widget.mainColor,
-      child: _gridWidget(),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Expanded(flex: 9, child: _gridWidget()),
+          ValueListenableBuilder<String>(
+              valueListenable: _message,
+              builder: (context, message, _) {
+                return message.isEmpty
+                    ? Container()
+                    : Flexible(
+                        flex: 1,
+                        child: Center(
+                          child: Text(
+                            message,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      );
+              }),
+          Flexible(
+            flex: 1,
+            child: RaisedButton(
+              onPressed: () async {
+                setState(() {
+                  _resetEverything();
+                });
+              },
+              child: Text(
+                "Reset",
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -131,19 +168,21 @@ class _BoardState extends State<Board> {
       key: card.cardKey,
       flipOnTouch: false,
       direction: FlipDirection.HORIZONTAL,
-      front: InkWell(
-        onTap: () async {
-          if (_flippedCards.length != 2) {
-            card.cardKey.currentState.toggleCard();
-            _flippedCards.add(card);
-            if (_flippedCards.length == 2)
-              //delay so player can't click new card before animation finishes or something like that
-              Future.delayed(
-                  const Duration(milliseconds: 500), () async => _maybeReset());
-          }
-        },
-        child: Container(
-          color: widget.frontCardColor,
+      front: Material(
+        //add material for ripple
+        color: widget.frontCardColor,
+        child: InkWell(
+          onTap: () async {
+            if (_flippedCards.length != 2) {
+              card.cardKey.currentState.toggleCard();
+              _flippedCards.add(card);
+              _totalFlippedCards++;
+              if (_flippedCards.length == 2)
+                //delay so player can't click new card before animation finishes or something like that
+                Future.delayed(const Duration(milliseconds: 500),
+                    () async => _maybeReset());
+            }
+          },
         ),
       ),
       back: Container(
@@ -156,7 +195,34 @@ class _BoardState extends State<Board> {
   _maybeReset() {
     if (_flippedCards[0].id != _flippedCards[1].id) {
       _flippedCards.forEach((card) => card.cardKey.currentState.toggleCard());
+      _totalFlippedCards -= 2;
     }
     _flippedCards.clear();
+    if (_totalFlippedCards == _cards.length) {
+      _message.value = "You won!";
+    }
+  }
+
+  _resetEverything() {
+    _message.value = "";
+    _totalFlippedCards = 0;
+
+    _cards.forEach((card) {
+      if (!card.cardKey.currentState.isFront) {
+        card.cardKey.currentState.toggleCard();
+      }
+    });
+
+    //delay for animation finish
+    Future.delayed(const Duration(milliseconds: 500), () async {
+      _flippedCards.clear();
+      _cards.shuffle(Random.secure());
+    });
+  }
+
+  @override
+  void dispose() {
+    _message.dispose();
+    super.dispose();
   }
 }
