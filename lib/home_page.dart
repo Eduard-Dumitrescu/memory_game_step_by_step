@@ -24,6 +24,9 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   PlayerMode _playerMode = PlayerMode.SinglePlayer;
 
+  GlobalKey p1k = new GlobalKey();
+  GlobalKey p2k = new GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,16 +90,32 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: <Widget>[
                   Expanded(
                       flex: 1,
-                      child: Transform.rotate(angle: pi, child: Board())),
-                  Expanded(flex: 1, child: Board()),
+                      child: Transform.rotate(
+                          angle: pi,
+                          child: Board(
+                            key: p1k,
+                          ))),
+                  Expanded(
+                      flex: 1,
+                      child: Board(
+                        key: p2k,
+                      )),
                 ],
               )
             : Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Expanded(flex: 1, child: Board()),
-                  Expanded(flex: 1, child: Board()),
+                  Expanded(
+                      flex: 1,
+                      child: Board(
+                        key: p1k,
+                      )),
+                  Expanded(
+                      flex: 1,
+                      child: Board(
+                        key: p2k,
+                      )),
                 ],
               );
     }
