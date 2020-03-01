@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:memory_game_step_by_step/card_model.dart';
 import 'package:memory_game_step_by_step/icon_assets.dart';
 import 'package:memory_game_step_by_step/utils.dart';
 
@@ -44,8 +47,8 @@ class Board extends StatefulWidget {
   final Color mainColor;
   final Color frontCardColor;
   final Color backCardColor;
-  final double numOfElements;
-  final double numOfColumns;
+  final int numOfElements;
+  final int numOfColumns;
 
   const Board(
       {Key key,
@@ -61,6 +64,24 @@ class Board extends StatefulWidget {
 }
 
 class _BoardState extends State<Board> {
+  List<CardModel> _cards;
+
+  @override
+  void initState() {
+    final int rnd =
+        Random().nextInt(IconAssets.assets.length - 1 - widget.numOfElements);
+
+    _cards = List<CardModel>();
+    List<int>.generate(widget.numOfElements, (i) => i + 1)
+        .map((num) => num % 2 == 0 ? num - 1 : num)
+        .forEach((item) => _cards.add(
+              CardModel(item, IconAssets.assets[item + rnd],
+                  GlobalKey<FlipCardState>()),
+            ));
+    _cards.shuffle(Random.secure());
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -72,15 +93,18 @@ class _BoardState extends State<Board> {
   Widget _gridWidget() {
     List<Widget> rows = List<Widget>();
 
-    for (int i = 0; i <= widget.numOfElements / widget.numOfColumns; i++) {
+    for (int i = 0; i < widget.numOfElements / widget.numOfColumns; i++) {
       List<Widget> elements = List<Widget>();
 
-      for (int j = 0; j <= widget.numOfColumns; j++) {
+      for (int j = 0; j < widget.numOfColumns; j++) {
+        final int index = i * widget.numOfColumns + j;
+        final CardModel card = _cards[index];
+
         elements.add(Flexible(
           flex: 1,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: _card(),
+            child: _card(card.imagePath, card.cardKey),
           ),
         ));
       }
@@ -101,15 +125,25 @@ class _BoardState extends State<Board> {
     );
   }
 
-  Widget _card() {
+  Widget _card(
+    String imgPath,
+    GlobalKey<FlipCardState> cardKey,
+  ) {
     return FlipCard(
+      key: cardKey,
+      flipOnTouch: false,
       direction: FlipDirection.HORIZONTAL,
-      front: Container(
-        color: widget.frontCardColor,
+      front: InkWell(
+        onTap: () async {
+          cardKey.currentState.toggleCard();
+        },
+        child: Container(
+          color: widget.frontCardColor,
+        ),
       ),
       back: Container(
         color: widget.backCardColor,
-        child: SvgPicture.asset(IconAssets.icon019Kitty30),
+        child: SvgPicture.asset(imgPath),
       ),
     );
   }
